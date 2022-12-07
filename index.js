@@ -5,8 +5,6 @@ const cors = require('cors');
 
 const { dbConnection } = require('./database/config');
 
-// mongodb+srv://mean-user-angular:KwbDw4VWliwCzX8g@cluster0.gvvx7.mongodb.net/test
-
 // Crear el servidor de express
 const app = express();
 
