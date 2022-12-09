@@ -1,0 +1,3 @@
+const getHospitales = (req, res) => {
+    
+};
