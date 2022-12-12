@@ -45,17 +45,13 @@ const login = async (req, res = response) => {
 
 const googleSignIn = async (req, res = response) => {
   try {
-    console.log("1");
     const { email, name, picture } = await googleVerify(req.body.token);
-    console.log("2");
 
     const usuarioDB = await Usuario.findOne({ email });
 
-    console.log("3");
     let usuario;
 
     if (!usuarioDB) {
-      console.log("4");
       usuario = new Usuario({
         nombre: name,
         email,
@@ -64,20 +60,15 @@ const googleSignIn = async (req, res = response) => {
         google: true,
       });
     } else {
-      console.log("4");
       usuario = usuarioDB;
       usuario.google = true;
       // usuario.password = '@@';
     }
 
     // Guardar usuario
-
-    console.log("5");
     await usuario.save();
 
     // Generar el TOKEN - JWT
-
-    console.log("6");
     const token = await generarJWT(usuario.id);
 
     res.json({
@@ -96,7 +87,20 @@ const googleSignIn = async (req, res = response) => {
   }
 };
 
+const renewToken = async (req, res) => {
+  const uid = req.uid;
+
+  // Generar el TOKEN - JWT
+  const token = await generarJWT(uid);
+
+  res.json({
+    ok: true,
+    token,
+  });
+};
+
 module.exports = {
   login,
   googleSignIn,
+  renewToken,
 };
