@@ -3,14 +3,24 @@ const bcrypt = require("bcryptjs");
 
 const Usuario = require("../models/usuario");
 const { generarJWT } = require("../helpers/jwt");
-
+/* 
+var serveIndex = require('serve-index');
+app.use(express.static(__dirname + '/'))
+app.use('/uploads', serveIndex(__dirname + '/uploads'));
+ */
 const getUsuarios = async (req, res) => {
-  const usuarios = await Usuario.find({}, "nombre email role google");
+  const desde = Number(req.query.desde) || 0;
+
+  const [usuarios, total] = await Promise.all([
+    Usuario.find({}, "nombre email role google img").skip(desde).limit(5),
+    Usuario.countDocuments(),
+  ]);
 
   res.json({
     ok: true,
     usuarios,
-    uid: req.uid
+    uid: req.uid,
+    total,
   });
 };
 
@@ -36,9 +46,11 @@ const crearUsuario = async (req, res = response) => {
     // Guardar usuario
     const token = await generarJWT(usuario.id);
 
+    const usuarioDB = await usuario.save();
+
     res.json({
       ok: true,
-      usuario,
+      usuario: usuarioDB,
       token,
     });
   } catch (error) {
@@ -109,13 +121,11 @@ const borrarUsuario = async (req, res = response) => {
     }
 
     await Usuario.findByIdAndDelete(uid);
-    
 
     res.status(200).json({
       ok: true,
-      msg: 'Usuario eliminado',
+      msg: "Usuario eliminado",
     });
-    
   } catch (error) {
     console.error(error);
     res.status(500).json({
